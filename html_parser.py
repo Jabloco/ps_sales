@@ -21,6 +21,13 @@ def get_sales(raw_html):
     return sales_links
 
 
+def get_pages(raw_html):
+    soup = BeautifulSoup(raw_html, 'html.parser')
+    with open('raw_html.html', 'w', encoding='utf8') as f:
+        f.write(str(soup))
+    pages_li = soup.find_all('button', class_='psw-button')
+    return pages_li
+
+
 def get_product(raw_html):
     pass
-
