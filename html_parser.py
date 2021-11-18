@@ -30,4 +30,18 @@ def get_pages(raw_html):
 
 
 def get_product(raw_html):
-    pass
+    product_data = {}
+    soup = BeautifulSoup(raw_html, 'html.parser')
+    product_name = (soup.find('main', class_='pdp-main psw-dark-theme')
+                        .find('div', class_='psw-l-stack-left psw-fill-x')
+                        .find('div', class_='psw-l-anchor psw-l-z-1 psw-l-grid psw-l-gap-y-7')
+                        .find('div', class_='psw-pdp-card-anchor psw-l-stack-bottom psw-l-w-1/1 psw-l-w-5/12@tablet-s psw-l-w-1/3@tablet-l psw-l-w-1/3@laptop psw-l-w-7/24@desktop psw-l-w-7/24@max psw-p-x-5@below-tablet-s')
+                        .find('div', class_='psw-c-bg-card-1 psw-p-y-7 psw-p-x-8 psw-m-sub-x-8 psw-m-sub-x-6@below-tablet-s psw-p-x-6@below-tablet-s')
+                        .find('div', class_='pdp-game-title')
+                        .find('div', class_='psw-root psw-dark-theme')
+                        .find('h1', class_='psw-m-b-5 psw-t-title-l psw-t-size-8 psw-l-line-break-word').text
+    )
+                    
+    product_data['name'] = product_name
+
+    return product_data
