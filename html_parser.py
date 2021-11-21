@@ -1,34 +1,37 @@
-import requests
 from bs4 import BeautifulSoup
-from requests.exceptions import RequestException
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
-from constants import HEADERS
+from constants import CHROME_DRIVER
 
 def get_html(url):
-    try:
-        raw_html = requests.get(url, HEADERS)
-        raw_html.raise_for_status()
-        return raw_html.text
-    except(requests.RequestException, ValueError):
-        return
+    chrome_options = Options()
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--window-size=1920x1080')
+    browser = webdriver.Chrome(chrome_options=chrome_options, executable_path=CHROME_DRIVER)
+    browser.get(url)
+    raw_html = browser.page_source
+    return raw_html
 
 
 def get_sales(raw_html):
     soup = BeautifulSoup(raw_html, 'html.parser')
     sales = (soup.find('div', class_='psw-m-t-6 psw-m-b-10')
-                    .find('ul')
-                    .find_all('li'))
+                .find('ul')
+                .find_all('li')
+            )
     sales_links = [sale.find('a')['href'] for sale in sales]
     return sales_links
 
 
 def get_pages(raw_html):
     soup = BeautifulSoup(raw_html, 'html.parser')
-    with open('raw_html.html', 'w', encoding='utf8') as f:
-        f.write(raw_html)
-    pages_ol = soup.find(attrs={'data-qa': 'ems-sdk-grid#ems-sdk-top-paginator-root#page...'}).text
-    return pages_ol
-
+    pages_li = (soup.find(attrs={'data-qa': 'ems-sdk-bottom-paginator-root'})
+                    .find('ol')
+                    .find_all('li')
+                )
+    pages = [page.find('button')['value'] for page in pages_li]
+    return pages[-1]
 
 def get_product(raw_html):
     product_data = {}
@@ -62,6 +65,12 @@ def get_product(raw_html):
     if ps_plus_mark:
         product_data['is_ps_plus_price'] = True
 
-    producr_description = soup.find()
+    # описание продукта
+    try:
+        product_description = soup.find(attrs={'data-qa': 'mfe-game-overview#description'}).text
+    except ArithmeticError:
+        product_description = None
+    if product_description:
+        product_data['description'] = product_description
 
     return product_data
