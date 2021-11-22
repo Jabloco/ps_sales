@@ -27,10 +27,13 @@ def get_sales(raw_html):
     Получает html, возвращает список ссылок на распродажи
     """
     soup = BeautifulSoup(raw_html, 'html.parser')
-    sales = (soup.find('div', class_='psw-m-t-6 psw-m-b-10')
-                .find('ul')
-                .find_all('li')
-            )
+    try:
+        sales = (soup.find('div', class_='psw-m-t-6 psw-m-b-10')
+                    .find('ul')
+                    .find_all('li')
+                )
+    except AttributeError:
+        return
     sales_links = [sale.find('a')['href'] for sale in sales]
     return sales_links
 
@@ -39,15 +42,24 @@ def get_pages(raw_html):
     """
     Функция для нахождения максимального числа страниц в магазине.
 
+    Принимает html
 
+    Возвращает последнее число из пагинатора
     """
     soup = BeautifulSoup(raw_html, 'html.parser')
-    pages_li = (soup.find(attrs={'data-qa': 'ems-sdk-bottom-paginator-root'})
-                    .find('ol')
-                    .find_all('li')
-                )
-    pages = [page.find('button')['value'] for page in pages_li]
+    try:
+        pages_li = (soup.find(attrs={'data-qa': 'ems-sdk-bottom-paginator-root'})
+                        .find('ol')
+                        .find_all('li')
+                    )
+    except AttributeError:
+        return
+    try:
+        pages = [page.find('button')['value'] for page in pages_li]
+    except UnboundLocalError:
+        return
     return int(pages[-1])
+
 
 def get_product(raw_html):
     """
@@ -61,7 +73,10 @@ def get_product(raw_html):
     soup = BeautifulSoup(raw_html, 'html.parser')
 
     # парсим имя игры
-    product_name = soup.find(attrs={'data-qa': 'mfe-game-title#name'}).text
+    try:
+        product_name = soup.find(attrs={'data-qa': 'mfe-game-title#name'}).text
+    except AttributeError:
+        product_name = None
     product_data['title'] = product_name
 
     # цена на игру со скидкой
@@ -69,16 +84,14 @@ def get_product(raw_html):
         price_final = soup.find(attrs={'data-qa': 'mfeCtaMain#offer0#finalPrice'}).text
     except AttributeError:
         price_final = None
-    if price_final:
-        product_data['price_final'] = price_final
+    product_data['price_final'] = price_final
 
     # обычная цена
     try:
         price_original = soup.find(attrs={'data-qa': 'mfeCtaMain#offer0#originalPrice'}).text
     except AttributeError:
         price_original = None
-    if price_original:
-        product_data['price_original'] = price_original
+    product_data['price_original'] = price_original
 
     # скидка для ps_plus?
     try:
@@ -86,14 +99,16 @@ def get_product(raw_html):
     except AttributeError:
         ps_plus_mark = None
     if ps_plus_mark:
-        product_data['is_ps_plus_price'] = True
+        is_ps_plus_price = True
+    else:
+        is_ps_plus_price = False
+    product_data['is_ps_plus_price'] = is_ps_plus_price
 
     # описание продукта
     try:
         product_description = soup.find(attrs={'data-qa': 'mfe-game-overview#description'}).text
-    except ArithmeticError:
+    except AttributeError:
         product_description = None
-    if product_description:
-        product_data['description'] = product_description
+    product_data['description'] = product_description
 
     return product_data

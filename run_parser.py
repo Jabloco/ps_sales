@@ -12,7 +12,7 @@ category_html = get_html(category_url)
 if category_html:
     print(get_pages(category_html))
 
-product_url = 'https://store.playstation.com/ru-ru/product/EP0006-CUSA05359_00-ANTHEM1000000000'
+product_url = 'https://store.playstation.com/ru-ru/product/EP4133-CUSA17124_00-AEONMUSTDIE00000'
 
 product_html = get_html(product_url)
 if product_html:
