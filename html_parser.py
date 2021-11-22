@@ -5,6 +5,12 @@ from selenium.webdriver.chrome.options import Options
 from constants import CHROME_DRIVER
 
 def get_html(url):
+    """
+    Функция получает ссылку и возвращает html-код.
+
+    Используется selenium и его возможность запуска без итерфейса (--headless)
+
+    """
     chrome_options = Options()
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--window-size=1920x1080')
@@ -15,6 +21,11 @@ def get_html(url):
 
 
 def get_sales(raw_html):
+    """
+    Функция для получения ссылок на распродажи.
+
+    Получает html, возвращает список ссылок на распродажи
+    """
     soup = BeautifulSoup(raw_html, 'html.parser')
     sales = (soup.find('div', class_='psw-m-t-6 psw-m-b-10')
                 .find('ul')
@@ -25,15 +36,27 @@ def get_sales(raw_html):
 
 
 def get_pages(raw_html):
+    """
+    Функция для нахождения максимального числа страниц в магазине.
+
+
+    """
     soup = BeautifulSoup(raw_html, 'html.parser')
     pages_li = (soup.find(attrs={'data-qa': 'ems-sdk-bottom-paginator-root'})
                     .find('ol')
                     .find_all('li')
                 )
     pages = [page.find('button')['value'] for page in pages_li]
-    return pages[-1]
+    return int(pages[-1])
 
 def get_product(raw_html):
+    """
+    Получение данных о продукте.
+
+    Принимает html
+
+    Возвращает словарь с данными
+    """
     product_data = {}
     soup = BeautifulSoup(raw_html, 'html.parser')
 
