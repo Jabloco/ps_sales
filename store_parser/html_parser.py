@@ -1,4 +1,5 @@
 import requests
+import logging
 
 from bs4 import BeautifulSoup
 from requests.exceptions import RequestException
@@ -7,6 +8,10 @@ from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import WebDriverException
 
 from constants import CHROME_DRIVER
+
+logging.basicConfig(handlers=[logging.FileHandler('parser_error.log', 'a', 'utf-8')],
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 def get_html(url):
     """
@@ -17,7 +22,8 @@ def get_html(url):
     try:
         raw_html = requests.get(url)
         raw_html.raise_for_status()
-    except RequestException:
+    except RequestException as error:
+        logging.exception(error)
         return
     return raw_html.text
 
@@ -37,7 +43,8 @@ def get_html_selenium(url):
     try:
         browser = webdriver.Chrome(chrome_options=chrome_options, executable_path=CHROME_DRIVER)
         browser.get(url)
-    except WebDriverException:
+    except WebDriverException as error:
+        logging.exception(error)
         return
     raw_html = browser.page_source
     return raw_html
@@ -52,8 +59,8 @@ def get_sales(raw_html):
     soup = BeautifulSoup(raw_html, 'html.parser')
     try:
         sales = (soup.find('div', class_='psw-m-t-6 psw-m-b-10')
-                    .find('ul')
-                    .find_all('li')
+                     .find('ul')
+                     .find_all('li')
                 )
     except AttributeError:
         return
