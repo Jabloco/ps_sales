@@ -1,6 +1,10 @@
+import requests
+
 from bs4 import BeautifulSoup
+from requests.exceptions import RequestException
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import WebDriverException
 
 from constants import CHROME_DRIVER
 
@@ -8,14 +12,33 @@ def get_html(url):
     """
     Функция получает ссылку и возвращает html-код.
 
+    Используем для статических страниц, ибо работает сильно быстрее selenium
+    """
+    try:
+        raw_html = requests.get(url)
+        raw_html.raise_for_status()
+    except RequestException:
+        return
+    return raw_html.text
+
+
+def get_html_selenium(url):
+    """
+    Функция получает ссылку и возвращает html-код.
+
     Используется selenium и его возможность запуска без итерфейса (--headless)
+
+    Есть смысл использовать данную функцию только для динамических страниц
 
     """
     chrome_options = Options()
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--window-size=1920x1080')
-    browser = webdriver.Chrome(chrome_options=chrome_options, executable_path=CHROME_DRIVER)
-    browser.get(url)
+    try:
+        browser = webdriver.Chrome(chrome_options=chrome_options, executable_path=CHROME_DRIVER)
+        browser.get(url)
+    except WebDriverException:
+        return
     raw_html = browser.page_source
     return raw_html
 
