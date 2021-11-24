@@ -91,7 +91,26 @@ def get_pages(raw_html):
     return int(pages[-1])
 
 
-def get_product(raw_html):
+def get_products(raw_html):
+    """
+    Функция собирает ссылки на игры со страницы магазина
+
+    При нимает html,  возвращает список ссылок на игры
+
+    """
+    soup = BeautifulSoup(raw_html, 'html.parser')
+    try:
+        product_li = soup.find('ul', class_='psw-grid-list psw-l-grid').find_all('li')
+    except AttributeError:
+        return
+    try:
+        products_url = [li.fina('a')['href'] for li in product_li]
+    except UnboundLocalError:
+        return
+    return products_url
+
+
+def get_product_details(raw_html):
     """
     Получение данных о продукте.
 
