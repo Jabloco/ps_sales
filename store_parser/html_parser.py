@@ -104,7 +104,7 @@ def get_products(raw_html):
     except AttributeError:
         return
     try:
-        products_url = [li.fina('a')['href'] for li in product_li]
+        products_url = [li.find('a')['href'] for li in product_li]
     except UnboundLocalError:
         return
     return products_url
