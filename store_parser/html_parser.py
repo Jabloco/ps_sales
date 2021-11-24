@@ -68,9 +68,9 @@ def get_sales(raw_html):
     return sales_links
 
 
-def get_pages(raw_html):
+def get_max_pages(raw_html):
     """
-    Функция для нахождения максимального числа страниц в магазине.
+    Функция для нахождения максимального числа страниц в разделе магазина.
 
     Принимает html
 
