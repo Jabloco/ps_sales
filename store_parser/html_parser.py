@@ -5,7 +5,10 @@ from bs4 import BeautifulSoup
 from requests.exceptions import RequestException
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import TimeoutException, WebDriverException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 from constants import CHROME_DRIVER
 
@@ -13,7 +16,7 @@ logging.basicConfig(handlers=[logging.FileHandler('parser_error.log', 'a', 'utf-
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-def get_html(url):
+def get_html(url:str) -> str:
     """
     Функция получает ссылку и возвращает html-код.
 
@@ -28,7 +31,7 @@ def get_html(url):
     return raw_html.text
 
 
-def get_html_selenium(url):
+def get_html_selenium(url:str) -> str:
     """
     Функция получает ссылку и возвращает html-код.
 
@@ -43,14 +46,19 @@ def get_html_selenium(url):
     try:
         browser = webdriver.Chrome(chrome_options=chrome_options, executable_path=CHROME_DRIVER)
         browser.get(url)
-    except WebDriverException as error:
+        elems = WebDriverWait(browser, 5).until(
+            EC.presence_of_all_elements_located((By.CLASS_NAME, 'psw-product-tile'))
+            )
+    except (TimeoutException, WebDriverException) as error:
+        print('timeout')
         logging.exception(error)
         return
     raw_html = browser.page_source
     return raw_html
+    # return elems
 
 
-def get_sales(raw_html):
+def get_sales(raw_html:str) -> list:
     """
     Функция для получения ссылок на распродажи.
 
@@ -68,7 +76,7 @@ def get_sales(raw_html):
     return sales_links
 
 
-def get_max_pages(raw_html):
+def get_max_pages(raw_html:str) -> int:
     """
     Функция для нахождения максимального числа страниц в разделе магазина.
 
@@ -91,7 +99,7 @@ def get_max_pages(raw_html):
     return int(pages[-1])
 
 
-def get_products(raw_html):
+def get_products(raw_html:str) -> list:
     """
     Функция собирает ссылки на игры со страницы магазина
 
@@ -105,12 +113,12 @@ def get_products(raw_html):
         return
     try:
         products_url = [li.find('a')['href'] for li in product_li]
-    except UnboundLocalError:
+    except (UnboundLocalError, TypeError):
         return
     return products_url
 
 
-def get_product_details(raw_html):
+def get_product_details(raw_html:str) -> dict:
     """
     Получение данных о продукте.
 
