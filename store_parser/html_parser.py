@@ -16,7 +16,7 @@ logging.basicConfig(handlers=[logging.FileHandler('parser_error.log', 'a', 'utf-
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-def get_html(url:str) -> str:
+def get_html(url: str) -> str:
     """
     Функция получает ссылку и возвращает html-код.
 
@@ -31,7 +31,7 @@ def get_html(url:str) -> str:
     return raw_html.text
 
 
-def get_html_selenium(url:str) -> str:
+def get_html_selenium(url: str) -> str:
     """
     Функция получает ссылку и возвращает html-код.
 
@@ -58,7 +58,7 @@ def get_html_selenium(url:str) -> str:
     # return elems
 
 
-def get_sales(raw_html:str) -> list:
+def get_sales(raw_html: str) -> list:
     """
     Функция для получения ссылок на распродажи.
 
@@ -76,7 +76,7 @@ def get_sales(raw_html:str) -> list:
     return sales_links
 
 
-def get_max_pages(raw_html:str) -> int:
+def get_max_pages(raw_html: str) -> int:
     """
     Функция для нахождения максимального числа страниц в разделе магазина.
 
@@ -99,7 +99,7 @@ def get_max_pages(raw_html:str) -> int:
     return int(pages[-1])
 
 
-def get_products(raw_html:str) -> list:
+def get_products(raw_html: str) -> list:
     """
     Функция собирает ссылки на игры со страницы магазина
 
@@ -118,7 +118,7 @@ def get_products(raw_html:str) -> list:
     return products_url
 
 
-def get_product_details(raw_html:str) -> dict:
+def get_product_details(raw_html: str) -> dict:
     """
     Получение данных о продукте.
 
