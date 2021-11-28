@@ -1,13 +1,10 @@
-import os
-
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
 
+from constants import DB_URI
 
-basedir = os.path.abspath(os.path.dirname(__file__))
-
-engine = create_engine('sqlite:///' + os.path.join(basedir, 'psprice.sqlite3'))
+engine = create_engine(DB_URI)
 db_session = scoped_session(sessionmaker(bind=engine))
 
 Base = declarative_base()
