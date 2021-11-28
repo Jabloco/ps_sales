@@ -128,9 +128,14 @@ def get_product_details(raw_html: str) -> dict:
     """
 
     def price_normilize(price_text: str) -> int:
+        """
+        Функция для нормализации цены.
+
+        """
         if price_text == 'Бесплатно':
             price_norm = 0
             return price_norm
+
         _, price_in_text = price_text.split()
         try:
             price_norm = int(price_in_text.replace('.', ''))
@@ -159,22 +164,15 @@ def get_product_details(raw_html: str) -> dict:
         price_final = None
     product_data['price_final'] = price_final
 
-    # обычная цена
+    # обычная цена (указывается при наличии скидки)
     try:
         price_original_on_page = soup.find(attrs={'data-qa': 'mfeCtaMain#offer0#originalPrice'}).text
     except AttributeError:
         price_original_on_page = None
-
     if price_original_on_page:
-        # _, price = price_original_on_page.split()
-        # try:
-        #     price_original = int(price_original_on_page.replace('.', ''))
-        # except TypeError:
-        #     price_original = None
         price_original = price_normilize(price_original_on_page)
     else:
         price_original = None
-
     product_data['price_original'] = price_original
 
     # скидка для ps_plus?

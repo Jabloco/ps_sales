@@ -2,7 +2,7 @@ from random import randint
 from time import sleep
 
 
-from store_parser.html_parser import get_html, get_sales, get_max_pages, get_product_details, get_products, get_html_selenium
+from html_parser import get_html, get_sales, get_max_pages, get_product_details, get_products, get_html_selenium
 from constants import BASE_URL, URL_REGION, URL_CATEGORY_ALL
 
 
@@ -20,8 +20,12 @@ def max_page_in_category(url: str) -> int:
     return
 
 
-def products_on_page_url(url: str) -> list:
-    sleep(randint(1, 5))
+def products_url_on_page(url: str) -> list:
+    """
+    Функция получения ссылок на продукты со страницы категории.
+
+    Принимает ссылку на страницу категории, возвращает список ссылок.
+    """
     page_html = get_html_selenium(url)
     if page_html:
         products_url = get_products(page_html)
@@ -46,7 +50,8 @@ if __name__ == '__main__':
         all_products_in_category = []
         for page in range(1, max_page + 1):
             page_url = f'{category_all_url}{str(page)}'
-            products_on_page = products_on_page_url(page_url)
+            sleep(randint(1, 5))
+            products_on_page = products_url_on_page(page_url)
             if products_on_page:
                 all_products_in_category.extend(products_on_page)
 
