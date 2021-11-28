@@ -126,6 +126,18 @@ def get_product_details(raw_html: str) -> dict:
 
     Возвращает словарь с данными
     """
+
+    def price_normilize(price_text: str) -> int:
+        if price_text == 'Бесплатно':
+            price_norm = 0
+            return price_norm
+        _, price_in_text = price_text.split()
+        try:
+            price_norm = int(price_in_text.replace('.', ''))
+        except TypeError:
+            price_norm = None
+        return price_norm
+
     product_data = {}
     soup = BeautifulSoup(raw_html, 'html.parser')
 
@@ -136,18 +148,33 @@ def get_product_details(raw_html: str) -> dict:
         product_name = None
     product_data['title'] = product_name
 
-    # цена на игру со скидкой
+    # финальная цена
     try:
-        price_final = soup.find(attrs={'data-qa': 'mfeCtaMain#offer0#finalPrice'}).text
+        price_final_on_page = soup.find(attrs={'data-qa': 'mfeCtaMain#offer0#finalPrice'}).text
     except AttributeError:
+        price_final_on_page = None
+    if price_final_on_page:
+        price_final = price_normilize(price_final_on_page)
+    else:
         price_final = None
     product_data['price_final'] = price_final
 
     # обычная цена
     try:
-        price_original = soup.find(attrs={'data-qa': 'mfeCtaMain#offer0#originalPrice'}).text
+        price_original_on_page = soup.find(attrs={'data-qa': 'mfeCtaMain#offer0#originalPrice'}).text
     except AttributeError:
+        price_original_on_page = None
+
+    if price_original_on_page:
+        # _, price = price_original_on_page.split()
+        # try:
+        #     price_original = int(price_original_on_page.replace('.', ''))
+        # except TypeError:
+        #     price_original = None
+        price_original = price_normilize(price_original_on_page)
+    else:
         price_original = None
+
     product_data['price_original'] = price_original
 
     # скидка для ps_plus?
