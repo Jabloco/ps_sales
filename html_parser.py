@@ -188,7 +188,7 @@ def get_product_details(raw_html: str) -> dict:
 
     # описание продукта
     try:
-        product_description = soup.find(attrs={'data-qa': 'mfe-game-overview#description'}).
+        product_description = soup.find(attrs={'data-qa': 'mfe-game-overview#description'}).text
     except AttributeError:
         product_description = None
     product_data['description'] = product_description
