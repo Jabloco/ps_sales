@@ -116,8 +116,3 @@ class Price(Base):
 
     def __repr__(self):
         return f'Price final {self.price_final}, price original {self.price_original}'
-
-
-if __name__ == '__main__':
-    # Base.metadata.create_all(bind=engine)
-    User.insert('fhfh', 75757, 'fjfjfj')
