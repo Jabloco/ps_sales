@@ -1,8 +1,45 @@
+import logging
+from os import name
+
 from sqlalchemy import Column, Integer, String, Date, ForeignKey
+import sqlalchemy
 from sqlalchemy.sql.schema import Table
 from sqlalchemy.orm import relationship
+from sqlalchemy.exc import InvalidRequestError, IntegrityError
 
-from db import Base, engine
+from db import Base, engine, db_session
+
+logging.basicConfig(handlers=[logging.FileHandler('req_error.log', 'a', 'utf-8')],
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
+
+
+def get_or_create(model, **kwargs):
+    """
+    Функция делает запрос в БД.
+
+    При наличии определенной записи возвращает ее,
+
+    при отсутствии, создаем и возвращаем.
+    """
+    try:
+        model_object = model.query.filter_by(**kwargs).first()
+    # Лишний аргумент в запросе.
+    except InvalidRequestError as error:
+        logging.exception(error)
+        return None, None
+    if model_object:
+        return model_object, False
+
+    model_object = model(**kwargs)
+    db_session.add(model_object)
+    try:
+        db_session.commit()
+    # Один из аргументов Unique уже существует.
+    except IntegrityError as error:
+        logging.exception(error)
+        return None, None
+    return model_object, True
 
 
 # связующая таблица  для м2м
@@ -12,17 +49,28 @@ user_product = Table('users_products', Base.metadata,
 )
 
 
-def get_or_create():
-    pass
-
-
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
     name = Column(String)
     phone = Column(Integer, unique=True)
     username = Column(String)
-    products = relationship('Products', secondary=user_product)
+    products = relationship('Product', secondary=user_product)
+
+    @classmethod
+    def insert(cls, t_name, t_phone, t_username):
+        """
+        Запись данных о пользователе в таблицу.
+
+        t_name, t_phone, t_username - данные из телеграм
+        """
+        model_object, _ = get_or_create(
+            cls,
+            name=t_name,
+            phone=t_phone,
+            username=t_username
+        )
+        return model_object
 
     def __repr__(self):
         return f'User {self.name} {self.phone} {self.username}'
@@ -34,6 +82,15 @@ class Product(Base):
     title = Column(String())
     description = Column(String())
     prices = relationship('Price', backref='prices')
+
+    @classmethod
+    def insert(cls, parsed_title, parsed_description):
+        model_object, _ = get_or_create(
+            cls,
+            title=parsed_title,
+            description=parsed_description
+        )
+        return model_object
 
     def __repr__(self):
         return f'Product {self.id} {self.description}'
@@ -47,11 +104,20 @@ class Price(Base):
     price_original = Column(Integer, nullable=True)
     date_change = Column(Date)
 
+    @classmethod
+    def insert(cls, geted_id_product, parsed_price_final, parsed_price_original, date):
+        model_object, _ = get_or_create(
+            id_product=geted_id_product,
+            price_final=parsed_price_final,
+            price_origin=parsed_price_original,
+            date_change=date
+        )
+        return model_object
+
     def __repr__(self):
         return f'Price final {self.price_final}, price original {self.price_original}'
 
 
-
-
 if __name__ == '__main__':
-    Base.metadata.create_all(bind=engine)
+    # Base.metadata.create_all(bind=engine)
+    User.insert('fhfh', 75757, 'fjfjfj')
