@@ -1,13 +1,12 @@
 import logging
-from os import name
 
 from sqlalchemy import Column, Integer, String, Date, ForeignKey
-import sqlalchemy
+
 from sqlalchemy.sql.schema import Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.exc import InvalidRequestError, IntegrityError
 
-from db import Base, engine, db_session
+from db import Base, db_session
 
 logging.basicConfig(handlers=[logging.FileHandler('req_error.log', 'a', 'utf-8')],
                     format='%(asctime)s - %(levelname)s - %(message)s')
