@@ -80,14 +80,16 @@ class Product(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String())
     description = Column(String())
+    url = Column(String())
     prices = relationship('Price', backref='prices')
 
     @classmethod
-    def insert(cls, parsed_title, parsed_description):
+    def insert(cls, parsed_title, parsed_description, parsed_url):
         model_object, _ = get_or_create(
             cls,
             title=parsed_title,
-            description=parsed_description
+            description=parsed_description,
+            url=parsed_url
         )
         return model_object
 
