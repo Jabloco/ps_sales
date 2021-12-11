@@ -1,5 +1,6 @@
 from random import randint
 from time import sleep
+from datetime import date
 
 
 from html_parser import get_html, get_max_pages, get_product_details, get_products, get_html_selenium
@@ -47,7 +48,7 @@ def all_url_in_category(category_url:str) -> list:
     
     max_page = max_page_in_category(category_url)
     if max_page:
-        for page in range(1, max_page + 1):
+        for page in range(1, 3):
             page_url = f'{category_url}{str(page)}'
             sleep(randint(1, 5))
             products_on_page = products_url_on_page(page_url)
@@ -55,6 +56,39 @@ def all_url_in_category(category_url:str) -> list:
                 all_products_in_category.extend(products_on_page)
         return all_products_in_category
     return
+
+
+def write_to_db(url_product):
+    product_url = f'{BASE_URL}{url_product}'
+    sleep(randint(1, 5))
+
+    product = Product.query.filter_by(url=url_product).first()
+
+    product_detail = get_product_details(get_html(product_url))
+
+    if product is None:
+        parsed_title = product_detail['title']
+        parsed_description = product_detail['description']
+        parsed_url = url_product
+
+        product_obj = Product.insert(
+            parsed_title,
+            parsed_description,
+            parsed_url
+        )
+
+        parsed_price_final = product_detail['price_final']
+        parsed_price_original = product_detail['price_final']
+        parsed_ps_plus_price = product_detail['is_ps_plus_price']
+        date_change = date.today()
+
+        price_obj = Price.insert(
+            product_obj.id,
+            parsed_price_final,
+            parsed_price_original,
+            parsed_ps_plus_price,
+            date_change
+        )
 
 
 def db_worker():
@@ -72,13 +106,7 @@ def db_worker():
 
     if url_in_category:
         for url_product in url_in_category:
-            product_url = f'{BASE_URL}{url_product}'
-            sleep(randint(1, 5))
-            product_detail = get_product_details(get_html(product_url))
-            print(product_detail)
-            # parsed_title = product_detail['title']
-            # parsed_description = product_detail['description']
-            # parsed_url = url_product
+            write_to_db(url_product)
 
 
 if __name__ == '__main__':
