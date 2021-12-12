@@ -48,7 +48,7 @@ def all_url_in_category(category_url:str) -> list:
     
     max_page = max_page_in_category(category_url)
     if max_page:
-        for page in range(1, 3):
+        for page in range(8, 11):
             page_url = f'{category_url}{str(page)}'
             sleep(randint(1, 5))
             products_on_page = products_url_on_page(page_url)
@@ -68,27 +68,28 @@ def write_to_db(url_product):
 
     if product is None:
         parsed_title = product_detail['title']
+        print(parsed_title)
         parsed_description = product_detail['description']
         parsed_url = url_product
 
-        product_obj = Product.insert(
+        product = Product.insert(
             parsed_title,
             parsed_description,
             parsed_url
         )
 
-        parsed_price_final = product_detail['price_final']
-        parsed_price_original = product_detail['price_final']
-        parsed_ps_plus_price = product_detail['is_ps_plus_price']
-        date_change = date.today()
+    parsed_price_final = product_detail['price_final']
+    parsed_price_original = product_detail['price_final']
+    parsed_ps_plus_price = product_detail['is_ps_plus_price']
+    date_change = date.today()
 
-        price_obj = Price.insert(
-            product_obj.id,
-            parsed_price_final,
-            parsed_price_original,
-            parsed_ps_plus_price,
-            date_change
-        )
+    price_obj = Price.insert(
+        product.id,
+        parsed_price_final,
+        parsed_price_original,
+        parsed_ps_plus_price,
+        date_change
+    )
 
 
 def db_worker():

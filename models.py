@@ -105,11 +105,10 @@ class Price(Base):
     __tablename__ = "prices"
     id = Column(Integer, primary_key=True)
     id_product = Column(Integer, ForeignKey(Product.id), index=True, nullable=False)
-    price_final = Column(Integer, nullable=True)
-    price_original = Column(Integer, nullable=True)
+    price_final = Column(String, nullable=True)
+    price_original = Column(String, nullable=True)
     price_is_ps_plus = Column(Boolean)
     date_change = Column(Date)
-    # prices = relationship('Price', backref='prices')
     product = relationship('Product', backref='products')
 
     @classmethod

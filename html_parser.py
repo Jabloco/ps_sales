@@ -70,7 +70,8 @@ def get_sales(raw_html: str) -> list:
                      .find('ul')
                      .find_all('li')
                 )
-    except AttributeError:
+    except AttributeError as error:
+        logging.exception(error)
         return
     sales_links = [sale.find('a')['href'] for sale in sales]
     return sales_links
@@ -90,11 +91,13 @@ def get_max_pages(raw_html: str) -> int:
                         .find('ol')
                         .find_all('li')
                     )
-    except AttributeError:
+    except AttributeError as error:
+        logging.exception(error)
         return
     try:
         pages = [page.find('button')['value'] for page in pages_li]
-    except UnboundLocalError:
+    except UnboundLocalError as error:
+        logging.exception(error)
         return
     return int(pages[-1])
 
@@ -109,11 +112,13 @@ def get_products(raw_html: str) -> list:
     soup = BeautifulSoup(raw_html, 'html.parser')
     try:
         product_li = soup.find('ul', class_='psw-grid-list psw-l-grid').find_all('li')
-    except AttributeError:
+    except AttributeError as error:
+        logging.exception(error)
         return
     try:
         products_url = [li.find('a')['href'] for li in product_li]
-    except (UnboundLocalError, TypeError):
+    except (UnboundLocalError, TypeError) as error:
+        logging.exception(error)
         return
     return products_url
 
@@ -132,14 +137,20 @@ def get_product_details(raw_html: str) -> dict:
         Функция для нормализации цены.
 
         """
+        print(price_text)
         if price_text == 'Бесплатно':
-            price_norm = 0
+            price_norm = price_text
+            return price_norm
+
+        if price_text == 'Недоступно для покупки':
+            price_norm = price_text
             return price_norm
 
         _, price_in_text = price_text.split()
         try:
             price_norm = int(price_in_text.replace('.', ''))
-        except TypeError:
+        except TypeError as error:
+            logging.exception(error)
             price_norm = None
         return price_norm
 
@@ -149,14 +160,16 @@ def get_product_details(raw_html: str) -> dict:
     # парсим имя игры
     try:
         product_name = soup.find(attrs={'data-qa': 'mfe-game-title#name'}).text
-    except AttributeError:
+    except AttributeError as error:
+        logging.exception(error)
         product_name = None
     product_data['title'] = product_name
 
     # финальная цена
     try:
         price_final_on_page = soup.find(attrs={'data-qa': 'mfeCtaMain#offer0#finalPrice'}).text
-    except AttributeError:
+    except AttributeError as error:
+        logging.exception(error)
         price_final_on_page = None
     if price_final_on_page:
         price_final = price_normilize(price_final_on_page)
@@ -167,7 +180,8 @@ def get_product_details(raw_html: str) -> dict:
     # обычная цена (указывается при наличии скидки)
     try:
         price_original_on_page = soup.find(attrs={'data-qa': 'mfeCtaMain#offer0#originalPrice'}).text
-    except AttributeError:
+    except AttributeError as error:
+        logging.exception(error)
         price_original_on_page = None
     if price_original_on_page:
         price_original = price_normilize(price_original_on_page)
@@ -178,7 +192,8 @@ def get_product_details(raw_html: str) -> dict:
     # скидка для ps_plus?
     try:
         ps_plus_mark = soup.find('span', class_='psw-c-t-ps-plus psw-m-r-3').text
-    except AttributeError:
+    except AttributeError as error:
+        logging.exception(error)
         ps_plus_mark = None
     if ps_plus_mark:
         is_ps_plus_price = True
@@ -189,7 +204,8 @@ def get_product_details(raw_html: str) -> dict:
     # описание продукта
     try:
         product_description = soup.find(attrs={'data-qa': 'mfe-game-overview#description'}).text
-    except AttributeError:
+    except AttributeError as error:
+        logging.exception(error)
         product_description = None
     product_data['description'] = product_description
 
