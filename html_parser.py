@@ -50,7 +50,6 @@ def get_html_selenium(url: str) -> str:
             EC.presence_of_all_elements_located((By.CLASS_NAME, 'psw-product-tile'))
             )
     except (TimeoutException, WebDriverException) as error:
-        print('timeout')
         logging.exception(error)
         return
     raw_html = browser.page_source
@@ -132,12 +131,11 @@ def get_product_details(raw_html: str) -> dict:
     Возвращает словарь с данными
     """
 
-    def price_normilize(price_text: str) -> int:
+    def price_normilize(price_text: str) -> str:
         """
         Функция для нормализации цены.
 
         """
-        print(price_text)
         if price_text == 'Бесплатно':
             price_norm = price_text
             return price_norm
@@ -148,7 +146,7 @@ def get_product_details(raw_html: str) -> dict:
 
         _, price_in_text = price_text.split()
         try:
-            price_norm = int(price_in_text.replace('.', ''))
+            price_norm = price_in_text.replace('.', '')
         except TypeError as error:
             logging.exception(error)
             price_norm = None
@@ -161,7 +159,6 @@ def get_product_details(raw_html: str) -> dict:
     try:
         product_name = soup.find(attrs={'data-qa': 'mfe-game-title#name'}).text
     except AttributeError as error:
-        logging.exception(error)
         product_name = None
     product_data['title'] = product_name
 
@@ -169,7 +166,6 @@ def get_product_details(raw_html: str) -> dict:
     try:
         price_final_on_page = soup.find(attrs={'data-qa': 'mfeCtaMain#offer0#finalPrice'}).text
     except AttributeError as error:
-        logging.exception(error)
         price_final_on_page = None
     if price_final_on_page:
         price_final = price_normilize(price_final_on_page)
@@ -181,7 +177,6 @@ def get_product_details(raw_html: str) -> dict:
     try:
         price_original_on_page = soup.find(attrs={'data-qa': 'mfeCtaMain#offer0#originalPrice'}).text
     except AttributeError as error:
-        logging.exception(error)
         price_original_on_page = None
     if price_original_on_page:
         price_original = price_normilize(price_original_on_page)
@@ -193,7 +188,6 @@ def get_product_details(raw_html: str) -> dict:
     try:
         ps_plus_mark = soup.find('span', class_='psw-c-t-ps-plus psw-m-r-3').text
     except AttributeError as error:
-        logging.exception(error)
         ps_plus_mark = None
     if ps_plus_mark:
         is_ps_plus_price = True
@@ -205,7 +199,6 @@ def get_product_details(raw_html: str) -> dict:
     try:
         product_description = soup.find(attrs={'data-qa': 'mfe-game-overview#description'}).text
     except AttributeError as error:
-        logging.exception(error)
         product_description = None
     product_data['description'] = product_description
 

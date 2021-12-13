@@ -6,6 +6,7 @@ from datetime import date
 from html_parser import get_html, get_max_pages, get_product_details, get_products, get_html_selenium
 from constants import BASE_URL, URL_REGION, URL_CATEGORY_ALL
 from models import Product, Price
+from sqlalchemy import desc
 
 
 def max_page_in_category(url: str) -> int:
@@ -68,7 +69,6 @@ def write_to_db(url_product):
 
     if product is None:
         parsed_title = product_detail['title']
-        print(parsed_title)
         parsed_description = product_detail['description']
         parsed_url = url_product
 
@@ -78,18 +78,28 @@ def write_to_db(url_product):
             parsed_url
         )
 
+    prices = Price.query.filter_by(id_product=product.id).order_by(desc(Price.date_change)).first()
     parsed_price_final = product_detail['price_final']
     parsed_price_original = product_detail['price_final']
     parsed_ps_plus_price = product_detail['is_ps_plus_price']
     date_change = date.today()
 
-    price_obj = Price.insert(
-        product.id,
-        parsed_price_final,
-        parsed_price_original,
-        parsed_ps_plus_price,
-        date_change
-    )
+    if prices is None:
+        price_obj = Price.insert(
+            product.id,
+            parsed_price_final,
+            parsed_price_original,
+            parsed_ps_plus_price,
+            date_change
+        )
+    elif prices.price_final != parsed_price_final or prices.price_original != parsed_price_original:
+        price_obj = Price.insert(
+            product.id,
+            parsed_price_final,
+            parsed_price_original,
+            parsed_ps_plus_price,
+            date_change
+        )
 
 
 def db_worker():

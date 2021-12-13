@@ -1,8 +1,8 @@
-"""complete models class
+"""new
 
-Revision ID: a53e2c484d7f
-Revises: 00d2b28c032f
-Create Date: 2021-12-05 13:19:13.168865
+Revision ID: db26ad2ea156
+Revises: 
+Create Date: 2021-12-13 15:21:23.705408
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'a53e2c484d7f'
-down_revision = '00d2b28c032f'
+revision = 'db26ad2ea156'
+down_revision = None
 branch_labels = None
 depends_on = None
 
@@ -22,6 +22,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('title', sa.String(), nullable=True),
     sa.Column('description', sa.String(), nullable=True),
+    sa.Column('url', sa.String(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('users',
@@ -35,8 +36,9 @@ def upgrade():
     op.create_table('prices',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('id_product', sa.Integer(), nullable=False),
-    sa.Column('price_final', sa.Integer(), nullable=True),
-    sa.Column('price_original', sa.Integer(), nullable=True),
+    sa.Column('price_final', sa.String(), nullable=True),
+    sa.Column('price_original', sa.String(), nullable=True),
+    sa.Column('price_is_ps_plus', sa.Boolean(), nullable=True),
     sa.Column('date_change', sa.Date(), nullable=True),
     sa.ForeignKeyConstraint(['id_product'], ['products.id'], ),
     sa.PrimaryKeyConstraint('id')
