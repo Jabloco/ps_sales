@@ -67,8 +67,7 @@ def get_sales(raw_html: str) -> list:
     try:
         sales = (soup.find('div', class_='psw-m-t-6 psw-m-b-10')
                      .find('ul')
-                     .find_all('li')
-                )
+                     .find_all('li'))
     except AttributeError as error:
         logging.exception(error)
         return
@@ -158,14 +157,14 @@ def get_product_details(raw_html: str) -> dict:
     # парсим имя игры
     try:
         product_name = soup.find(attrs={'data-qa': 'mfe-game-title#name'}).text
-    except AttributeError as error:
+    except AttributeError:
         product_name = None
     product_data['title'] = product_name
 
     # финальная цена
     try:
         price_final_on_page = soup.find(attrs={'data-qa': 'mfeCtaMain#offer0#finalPrice'}).text
-    except AttributeError as error:
+    except AttributeError:
         price_final_on_page = None
     if price_final_on_page:
         price_final = price_normilize(price_final_on_page)
@@ -176,7 +175,7 @@ def get_product_details(raw_html: str) -> dict:
     # обычная цена (указывается при наличии скидки)
     try:
         price_original_on_page = soup.find(attrs={'data-qa': 'mfeCtaMain#offer0#originalPrice'}).text
-    except AttributeError as error:
+    except AttributeError:
         price_original_on_page = None
     if price_original_on_page:
         price_original = price_normilize(price_original_on_page)
@@ -187,7 +186,7 @@ def get_product_details(raw_html: str) -> dict:
     # скидка для ps_plus?
     try:
         ps_plus_mark = soup.find('span', class_='psw-c-t-ps-plus psw-m-r-3').text
-    except AttributeError as error:
+    except AttributeError:
         ps_plus_mark = None
     if ps_plus_mark:
         is_ps_plus_price = True
@@ -198,7 +197,7 @@ def get_product_details(raw_html: str) -> dict:
     # описание продукта
     try:
         product_description = soup.find(attrs={'data-qa': 'mfe-game-overview#description'}).text
-    except AttributeError as error:
+    except AttributeError:
         product_description = None
     product_data['description'] = product_description
 

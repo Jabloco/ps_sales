@@ -46,10 +46,10 @@ def all_url_in_category(category_url:str) -> list:
     Возвращает список ссылок
     """
     all_products_in_category = []
-    
+
     max_page = max_page_in_category(category_url)
     if max_page:
-        for page in range(8, 11):
+        for page in range(1, max_page + 1):
             page_url = f'{category_url}{str(page)}'
             sleep(randint(1, 5))
             products_on_page = products_url_on_page(page_url)
