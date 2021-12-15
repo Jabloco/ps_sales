@@ -29,6 +29,8 @@ def products_url_on_page(url: str) -> list:
 
     Принимает ссылку на страницу категории, возвращает список ссылок.
     """
+    # увеличил время в get_html_selenium
+    # нужно добавить проверку
     page_html = get_html_selenium(url)
     if page_html:
         products_url = get_products(page_html)
@@ -37,7 +39,7 @@ def products_url_on_page(url: str) -> list:
     return
 
 
-def all_url_in_category(category_url:str) -> list:
+def all_url_in_category(category_url: str) -> list:
     """
     Функция для получения всех ссылок в категории
 
@@ -49,7 +51,7 @@ def all_url_in_category(category_url:str) -> list:
 
     max_page = max_page_in_category(category_url)
     if max_page:
-        for page in range(1, max_page + 1):
+        for page in range(1, 3):
             page_url = f'{category_url}{str(page)}'
             sleep(randint(1, 5))
             products_on_page = products_url_on_page(page_url)
@@ -59,19 +61,33 @@ def all_url_in_category(category_url:str) -> list:
     return
 
 
-def write_to_db(url_product):
+def check_product_in_db(url_product):
+    """
+    Функция для проверки наличия продукта в БД
+
+    Возвращает метку наличия, если продукта нет в БД то еще возвращает детали о продукте
+    """
     product_url = f'{BASE_URL}{url_product}'
-    sleep(randint(1, 5))
+    is_product_in_db = Product.query.filter_by(url=url_product).first()
+    if is_product_in_db is None:
+        sleep(randint(1, 5))
+        product_detail = get_product_details(get_html(product_url))
+        product_detail['url'] = url_product
+        return False, product_detail
+    return True, None
 
-    product = Product.query.filter_by(url=url_product).first()
+# между этими функциями логическая не состыковка
 
-    product_detail = get_product_details(get_html(product_url))
+def write_to_db(is_product_in_db, product_detail):
+    """
+    Функция записи данных в БД
 
-    if product is None:
+    Принимает метку наличия продуката в базе и детали продукта
+    """
+    if is_product_in_db is None:
         parsed_title = product_detail['title']
         parsed_description = product_detail['description']
-        parsed_url = url_product
-
+        parsed_url = product_detail['url']
         product = Product.insert(
             parsed_title,
             parsed_description,
@@ -92,6 +108,8 @@ def write_to_db(url_product):
             parsed_ps_plus_price,
             date_change
         )
+        print (price_obj)
+        return False, price_obj
     elif prices.price_final != parsed_price_final or prices.price_original != parsed_price_original:
         price_obj = Price.insert(
             product.id,
@@ -100,7 +118,7 @@ def write_to_db(url_product):
             parsed_ps_plus_price,
             date_change
         )
-
+        return True, price_obj
 
 def db_worker():
     """
@@ -117,7 +135,8 @@ def db_worker():
 
     if url_in_category:
         for url_product in url_in_category:
-            write_to_db(url_product)
+            is_product_in_db, product_detail = check_product_in_db(url_product)
+            write_to_db(is_product_in_db, product_detail)
 
 
 if __name__ == '__main__':
