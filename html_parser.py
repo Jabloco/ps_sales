@@ -50,7 +50,6 @@ def get_html_selenium(url: str) -> str:
             EC.presence_of_all_elements_located((By.CLASS_NAME, 'psw-product-tile'))
             )
     except (TimeoutException, WebDriverException) as error:
-        print('timeout')
         logging.exception(error)
         return
     raw_html = browser.page_source
@@ -68,9 +67,9 @@ def get_sales(raw_html: str) -> list:
     try:
         sales = (soup.find('div', class_='psw-m-t-6 psw-m-b-10')
                      .find('ul')
-                     .find_all('li')
-                )
-    except AttributeError:
+                     .find_all('li'))
+    except AttributeError as error:
+        logging.exception(error)
         return
     sales_links = [sale.find('a')['href'] for sale in sales]
     return sales_links
@@ -90,11 +89,13 @@ def get_max_pages(raw_html: str) -> int:
                         .find('ol')
                         .find_all('li')
                     )
-    except AttributeError:
+    except AttributeError as error:
+        logging.exception(error)
         return
     try:
         pages = [page.find('button')['value'] for page in pages_li]
-    except UnboundLocalError:
+    except UnboundLocalError as error:
+        logging.exception(error)
         return
     return int(pages[-1])
 
@@ -109,11 +110,13 @@ def get_products(raw_html: str) -> list:
     soup = BeautifulSoup(raw_html, 'html.parser')
     try:
         product_li = soup.find('ul', class_='psw-grid-list psw-l-grid').find_all('li')
-    except AttributeError:
+    except AttributeError as error:
+        logging.exception(error)
         return
     try:
         products_url = [li.find('a')['href'] for li in product_li]
-    except (UnboundLocalError, TypeError):
+    except (UnboundLocalError, TypeError) as error:
+        logging.exception(error)
         return
     return products_url
 
@@ -127,19 +130,24 @@ def get_product_details(raw_html: str) -> dict:
     Возвращает словарь с данными
     """
 
-    def price_normilize(price_text: str) -> int:
+    def price_normilize(price_text: str) -> str:
         """
         Функция для нормализации цены.
 
         """
         if price_text == 'Бесплатно':
-            price_norm = 0
+            price_norm = price_text
+            return price_norm
+
+        if price_text == 'Недоступно для покупки':
+            price_norm = price_text
             return price_norm
 
         _, price_in_text = price_text.split()
         try:
-            price_norm = int(price_in_text.replace('.', ''))
-        except TypeError:
+            price_norm = price_in_text.replace('.', '')
+        except TypeError as error:
+            logging.exception(error)
             price_norm = None
         return price_norm
 

@@ -1,9 +1,9 @@
 import logging
 
-from sqlalchemy import Column, Integer, String, Date, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, Date, ForeignKey
 
 from sqlalchemy.sql.schema import Table
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import backref, relationship
 from sqlalchemy.exc import InvalidRequestError, IntegrityError
 
 from db import Base, db_session
@@ -81,10 +81,14 @@ class Product(Base):
     title = Column(String())
     description = Column(String())
     url = Column(String())
-    prices = relationship('Price', backref='prices')
 
     @classmethod
-    def insert(cls, parsed_title, parsed_description, parsed_url):
+    def insert(
+        cls,
+        parsed_title,
+        parsed_description,
+        parsed_url
+        ):
         model_object, _ = get_or_create(
             cls,
             title=parsed_title,
@@ -101,16 +105,27 @@ class Price(Base):
     __tablename__ = "prices"
     id = Column(Integer, primary_key=True)
     id_product = Column(Integer, ForeignKey(Product.id), index=True, nullable=False)
-    price_final = Column(Integer, nullable=True)
-    price_original = Column(Integer, nullable=True)
+    price_final = Column(String, nullable=True)
+    price_original = Column(String, nullable=True)
+    price_is_ps_plus = Column(Boolean)
     date_change = Column(Date)
+    product = relationship('Product', backref='products')
 
     @classmethod
-    def insert(cls, geted_id_product, parsed_price_final, parsed_price_original, date):
+    def insert(
+        cls,
+        geted_id_product,
+        parsed_price_final,
+        parsed_price_original,
+        parsed_is_ps_plus_price,
+        date
+    ):
         model_object, _ = get_or_create(
+            cls,
             id_product=geted_id_product,
             price_final=parsed_price_final,
-            price_origin=parsed_price_original,
+            price_original=parsed_price_original,
+            price_is_ps_plus=parsed_is_ps_plus_price,
             date_change=date
         )
         return model_object
