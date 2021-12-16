@@ -51,7 +51,7 @@ def all_url_in_category(category_url: str) -> list:
 
     max_page = max_page_in_category(category_url)
     if max_page:
-        for page in range(1, 3):
+        for page in range(1, 2):
             page_url = f'{category_url}{str(page)}'
             sleep(randint(1, 5))
             products_on_page = products_url_on_page(page_url)
@@ -65,26 +65,33 @@ def check_product_in_db(url_product):
     """
     Функция для проверки наличия продукта в БД
 
-    Возвращает метку наличия, если продукта нет в БД то еще возвращает детали о продукте
+    Возвращает 2 значения:
+
+        1. детали продукта
+
+        2. объект из БД, если есть
     """
+
     product_url = f'{BASE_URL}{url_product}'
-    is_product_in_db = Product.query.filter_by(url=url_product).first()
-    if is_product_in_db is None:
-        sleep(randint(1, 5))
-        product_detail = get_product_details(get_html(product_url))
-        product_detail['url'] = url_product
-        return False, product_detail
-    return True, None
+    sleep(randint(1, 5))
+    product_detail = get_product_details(get_html(product_url))
+    product_detail['url'] = url_product
+    product_in_db = Product.query.filter_by(url=url_product).first()
+
+    if product_in_db is None:
+        return product_detail, product_in_db
+    if product_in_db:
+        return product_detail, product_in_db
 
 # между этими функциями логическая не состыковка
 
-def write_to_db(is_product_in_db, product_detail):
+def write_to_db(product_detail, product_in_db):
     """
     Функция записи данных в БД
 
-    Принимает метку наличия продуката в базе и детали продукта
+    Принимает детали продукта (словарь) и объект продукта из БД
     """
-    if is_product_in_db is None:
+    if product_in_db is None:
         parsed_title = product_detail['title']
         parsed_description = product_detail['description']
         parsed_url = product_detail['url']
@@ -93,10 +100,12 @@ def write_to_db(is_product_in_db, product_detail):
             parsed_description,
             parsed_url
         )
+    if product_in_db:
+        product = product_in_db
 
     prices = Price.query.filter_by(id_product=product.id).order_by(desc(Price.date_change)).first()
     parsed_price_final = product_detail['price_final']
-    parsed_price_original = product_detail['price_final']
+    parsed_price_original = product_detail['price_original']
     parsed_ps_plus_price = product_detail['is_ps_plus_price']
     date_change = date.today()
 
@@ -108,9 +117,10 @@ def write_to_db(is_product_in_db, product_detail):
             parsed_ps_plus_price,
             date_change
         )
-        print (price_obj)
-        return False, price_obj
-    elif prices.price_final != parsed_price_final or prices.price_original != parsed_price_original:
+        print('*')
+        print(price_obj)
+        return False, str(price_obj)
+    if prices.price_final != parsed_price_final or prices.price_original != parsed_price_original:
         price_obj = Price.insert(
             product.id,
             parsed_price_final,
@@ -118,7 +128,10 @@ def write_to_db(is_product_in_db, product_detail):
             parsed_ps_plus_price,
             date_change
         )
-        return True, price_obj
+        print('**')
+        print(price_obj)
+        return True, str(price_obj)
+    print('***')
 
 def db_worker():
     """
