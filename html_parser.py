@@ -46,7 +46,7 @@ def get_html_selenium(url: str) -> str:
     try:
         browser = webdriver.Chrome(chrome_options=chrome_options, executable_path=CHROME_DRIVER)
         browser.get(url)
-        elems = WebDriverWait(browser, 5).until(
+        elems = WebDriverWait(browser, 10).until(
             EC.presence_of_all_elements_located((By.CLASS_NAME, 'psw-product-tile'))
             )
     except (TimeoutException, WebDriverException) as error:
