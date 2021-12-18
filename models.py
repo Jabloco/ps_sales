@@ -1,6 +1,6 @@
 import logging
 
-from sqlalchemy import Column, Integer, String, Boolean, Date, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
 
 from sqlalchemy.sql.schema import Table
 from sqlalchemy.orm import backref, relationship
@@ -108,7 +108,7 @@ class Price(Base):
     price_final = Column(String, nullable=True)
     price_original = Column(String, nullable=True)
     price_is_ps_plus = Column(Boolean)
-    date_change = Column(Date)
+    date_change = Column(DateTime)
     product = relationship('Product', backref='products')
 
     @classmethod

@@ -1,6 +1,6 @@
 from random import randint
 from time import sleep
-from datetime import date
+from datetime import datetime
 
 
 from html_parser import get_html, get_max_pages, get_product_details, get_products, get_html_selenium
@@ -107,7 +107,7 @@ def write_to_db(product_detail, product_in_db):
     parsed_price_final = product_detail['price_final']
     parsed_price_original = product_detail['price_original']
     parsed_ps_plus_price = product_detail['is_ps_plus_price']
-    date_change = date.today()
+    date_change = datetime.now()
 
     if prices is None:
         price_obj = Price.insert(
@@ -117,8 +117,6 @@ def write_to_db(product_detail, product_in_db):
             parsed_ps_plus_price,
             date_change
         )
-        print('*')
-        print(price_obj)
         return False, str(price_obj)
     if prices.price_final != parsed_price_final or prices.price_original != parsed_price_original:
         price_obj = Price.insert(
@@ -128,10 +126,8 @@ def write_to_db(product_detail, product_in_db):
             parsed_ps_plus_price,
             date_change
         )
-        print('**')
-        print(price_obj)
         return True, str(price_obj)
-    print('***')
+    return None
 
 def db_worker():
     """
