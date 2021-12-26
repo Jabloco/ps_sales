@@ -1,6 +1,7 @@
 chromedriver
 raw_html.html
 *.sqlite3
+bot_settings.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

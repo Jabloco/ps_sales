@@ -51,8 +51,6 @@ user_product = Table('users_products', Base.metadata,
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
-    name = Column(String)
-    phone = Column(Integer, unique=True)
     username = Column(String)
     products = relationship('Product', secondary=user_product)
 
