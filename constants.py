@@ -1,7 +1,11 @@
-import os
+# import os
 
-basedir = os.path.abspath(os.path.dirname(__file__))
-DB_URI = 'sqlite:///' + os.path.join(basedir, 'psprice.sqlite3')
+from db_settings import db_host, db_username, db_name, db_password
+
+# basedir = os.path.abspath(os.path.dirname(__file__))
+# DB_URI = 'sqlite:///' + os.path.join(basedir, 'psprice.sqlite3')
+
+DB_URI = f'postgresql://{db_username}:{db_password}@{db_host}/{db_name}'
 
 BASE_URL = 'https://store.playstation.com/'
 URL_REGION = 'ru-ru/'
