@@ -1,3 +1,8 @@
+bot.py
+    ∟ bot_heandler.py
+        ∟ api_client.py
+            ∟ bot_api.py
+
 Ссылка на БД лежит в constants. При переезде на сервер или другую СУБД править DB_URI.
 
 Эта же настройка подхватиться в migration\env.py
