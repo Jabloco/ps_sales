@@ -55,16 +55,14 @@ class User(Base):
     products = relationship('Product', secondary=user_product)
 
     @classmethod
-    def insert(cls, t_name, t_phone, t_username):
+    def insert(cls, t_username):
         """
         Запись данных о пользователе в таблицу.
 
-        t_name, t_phone, t_username - данные из телеграм
+        t_username - id пользователя из телеграм
         """
         model_object, _ = get_or_create(
             cls,
-            name=t_name,
-            phone=t_phone,
             username=t_username
         )
         return model_object
